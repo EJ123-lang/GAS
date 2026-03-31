@@ -1,0 +1,63 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.7",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Aura",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"GameplayAbilities",
+				"UMG",
+				"CoreUObject",
+				"EnhancedInput",
+				"AIModule",
+				"Niagara",
+				"ModelViewViewModel"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "MotionWarping",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
+			"Enabled": true
+		},
+		{
+			"Name": "DungeonArchitectBasic",
+			"Enabled": true,
+			"MarketplaceURL": "https://www.fab.com/listings/e63ef5d6-3349-4ec5-903e-fa5eb2c316e8"
+		},
+		{
+			"Name": "UltimateQuestSystem",
+			"Enabled": true
+		},
+		{
+			"Name": "NarrativeCommonUI",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/f1adaffd049b44cca254832b2beeb1b7"
+		},
+		{
+			"Name": "NarrativeInteraction",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/46d407c1917d4575bfc2a8bb1cb5185d"
+		}
+	]
+}

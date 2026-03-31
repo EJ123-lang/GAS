@@ -1,0 +1,18 @@
+# Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+
+# Build files
+*.pdb
+*.obj
+*.exe
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
