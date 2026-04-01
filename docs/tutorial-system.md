@@ -55,3 +55,5 @@ Bind your widget or HUD to:
   - Objective `CastAbility`: RequiredCount=1
 
 This gives you a real tutorial-quest loop: objectives track incrementally and the step can auto-advance or wait for explicit confirmation.
+
+For a complete beginner Blueprint + UI walkthrough, see `docs/tutorial-beginner-blueprint-ui.md`.
