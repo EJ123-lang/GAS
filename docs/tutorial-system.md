@@ -1,36 +1,57 @@
-# In-Game Tutorial System (Aura)
+# In-Game Tutorial Quest System (Aura)
 
-A lightweight tutorial flow is now available through `UAuraTutorialSubsystem` and `UAuraTutorialDataAsset`.
+The tutorial system now supports **quest-style objectives** per step.
 
-## What was added
-- `FTutorialStep` struct for step content (`StepId`, `Title`, `Description`, display/completion metadata).
-- `UAuraTutorialDataAsset` for authoring tutorials in the editor.
-- `UAuraTutorialSubsystem` (`GameInstanceSubsystem`) that can:
-  - Start/stop tutorials
-  - Move between steps
-  - Broadcast events for UI widgets
+## Core pieces
+- `FTutorialObjective`: one quest objective with `ObjectiveId`, `Description`, and `RequiredCount`.
+- `FTutorialStep`: a tutorial step containing `Objectives` plus behavior flags.
+- `UAuraTutorialDataAsset`: author complete tutorial flows in content.
+- `UAuraTutorialSubsystem`: runtime controller for progress, completion, and UI events.
 
-## Recommended setup in Blueprints
-1. Create a new data asset of type `AuraTutorialDataAsset`.
-2. Fill in `TutorialId`, `DisplayName`, and `Steps`.
-3. In your HUD/UI bootstrap Blueprint:
-   - `Get Game Instance Subsystem` -> `AuraTutorialSubsystem`
-   - Bind to:
-     - `OnTutorialStarted`
-     - `OnTutorialStepChanged`
-     - `OnTutorialFinished`
-4. On first player spawn or after movement unlock, call `StartTutorial` with your asset.
-5. When player finishes an objective, call `CompleteCurrentStep`.
+## Step behavior flags
+Each `FTutorialStep` now supports:
+- `bRequireExplicitCompletion`
+  - `true`: objectives can complete, but step only advances when `CompleteCurrentStep()` is called.
+  - `false`: step can auto-advance when objectives complete.
+- `bAutoAdvanceWhenObjectivesComplete`
+  - If enabled (and explicit completion is not required), subsystem automatically advances.
+- `MinDisplayTime`
+  - Prevents finishing too early; objective completion still waits until minimum time elapses.
 
-## Example flow
-- Step 1: "Move" (WASD)
-- Step 2: "Camera" (Mouse Look)
-- Step 3: "Basic Attack" (LMB)
-- Step 4: "Ability" (InputTag.1)
+## Runtime API (Blueprint)
+From `AuraTutorialSubsystem`:
+- `StartTutorial`
+- `ReportObjectiveProgress(ObjectiveId, Delta)`
+- `GetObjectiveProgress`
+- `IsCurrentStepObjectivesComplete`
+- `CompleteCurrentStep`
+- `AdvanceToNextStep`
+- `GoToStep`
+- `StopTutorial`
 
-Each gameplay event should call `CompleteCurrentStep` only when the expected objective is met.
+## Events for UI / Quest Tracker
+Bind your widget or HUD to:
+- `OnTutorialStarted`
+- `OnTutorialStepChanged`
+- `OnTutorialObjectiveProgress`
+- `OnTutorialFinished`
 
-## Notes
-- Subsystem is intentionally UI-agnostic; your widget decides how to render steps.
-- If you need branching tutorials, use `GoToStep` from Blueprint logic based on conditions.
-- For persistence (skip already-completed tutorial), store `TutorialId` completion in your save-game class.
+## Recommended Blueprint wiring
+1. Create `AuraTutorialDataAsset` with steps/objectives.
+2. On game start or first spawn:
+   - `Get Game Instance Subsystem (AuraTutorialSubsystem)`
+   - bind events
+   - call `StartTutorial`
+3. On gameplay events, report progress:
+   - movement detected -> `ReportObjectiveProgress("Move", 1)`
+   - attack landed -> `ReportObjectiveProgress("Attack", 1)`
+   - ability cast -> `ReportObjectiveProgress("CastAbility", 1)`
+4. If a step requires manual confirmation, call `CompleteCurrentStep` (e.g., after player clicks “Got it”).
+
+## Example quest-like step
+- Step: "Learn Basic Combat"
+  - Objective `Move`: RequiredCount=1
+  - Objective `Attack`: RequiredCount=3
+  - Objective `CastAbility`: RequiredCount=1
+
+This gives you a real tutorial-quest loop: objectives track incrementally and the step can auto-advance or wait for explicit confirmation.
