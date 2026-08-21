@@ -8,10 +8,13 @@ on:
     paths:
       - 'beeswins-trigger.txt'
       - '.github/workflows/beeswins-apk.yml'
+  issues:
+    types: [opened]
   workflow_dispatch:
 
 jobs:
   build:
+    if: github.event_name != 'issues' || contains(github.event.issue.title, '[BUILD BEESWINS]')
     name: Build BeesWins v1.0.0
     runs-on: ubuntu-latest
     timeout-minutes: 30
