@@ -7,11 +7,14 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * App-wide quality-of-life helpers for BeesWins.
@@ -19,6 +22,8 @@ import java.util.Locale;
  * to be typed manually at an auction.
  */
 public class BeesWinsApp extends Application {
+    private final Map<Activity, ViewTreeObserver.OnGlobalLayoutListener> layoutListeners = new WeakHashMap<>();
+    private final Map<Activity, View> roots = new WeakHashMap<>();
 
     @Override
     public void onCreate() {
@@ -27,14 +32,31 @@ public class BeesWinsApp extends Application {
             @Override public void onActivityCreated(Activity activity, Bundle state) {}
             @Override public void onActivityStarted(Activity activity) {}
             @Override public void onActivityResumed(Activity activity) {
-                View root = activity.getWindow().getDecorView();
-                root.post(() -> wireDateFields(activity, root));
+                installDateFieldWatcher(activity);
             }
             @Override public void onActivityPaused(Activity activity) {}
             @Override public void onActivityStopped(Activity activity) {}
             @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
-            @Override public void onActivityDestroyed(Activity activity) {}
+            @Override public void onActivityDestroyed(Activity activity) {
+                View root = roots.remove(activity);
+                ViewTreeObserver.OnGlobalLayoutListener listener = layoutListeners.remove(activity);
+                if (root != null && listener != null && root.getViewTreeObserver().isAlive()) {
+                    root.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+                }
+            }
         });
+    }
+
+    private void installDateFieldWatcher(Activity activity) {
+        View root = activity.getWindow().getDecorView();
+        wireDateFields(activity, root);
+
+        if (layoutListeners.containsKey(activity)) return;
+
+        ViewTreeObserver.OnGlobalLayoutListener listener = () -> wireDateFields(activity, root);
+        roots.put(activity, root);
+        layoutListeners.put(activity, listener);
+        root.getViewTreeObserver().addOnGlobalLayoutListener(listener);
     }
 
     private void wireDateFields(Activity activity, View view) {
