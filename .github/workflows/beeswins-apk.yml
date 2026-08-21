@@ -3,6 +3,7 @@ name: Build BeesWins APK
 on:
   push:
     branches:
+      - main
       - 'claude/beeswins-gas-artifact'
     paths:
       - 'beeswins-trigger.txt'
@@ -18,7 +19,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout build branch
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -74,11 +75,15 @@ jobs:
           retention-days: 30
           compression-level: 0
 
-      - name: Publish APK to build branch
+      - name: Publish APK to isolated output branch
         run: |
+          cp dist/BeesWins-v1.0.0.apk /tmp/BeesWins-v1.0.0.apk
+          cp dist/BeesWins-v1.0.0.apk.sha256 /tmp/BeesWins-v1.0.0.apk.sha256
+          git fetch origin claude/beeswins-gas-output
+          git switch claude/beeswins-gas-output
           mkdir -p beeswins-output
-          cp dist/BeesWins-v1.0.0.apk beeswins-output/BeesWins-v1.0.0.apk
-          cp dist/BeesWins-v1.0.0.apk.sha256 beeswins-output/BeesWins-v1.0.0.apk.sha256
+          cp /tmp/BeesWins-v1.0.0.apk beeswins-output/BeesWins-v1.0.0.apk
+          cp /tmp/BeesWins-v1.0.0.apk.sha256 beeswins-output/BeesWins-v1.0.0.apk.sha256
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add beeswins-output/BeesWins-v1.0.0.apk beeswins-output/BeesWins-v1.0.0.apk.sha256
@@ -86,5 +91,5 @@ jobs:
             echo 'APK output already current.'
           else
             git commit -m 'Publish BeesWins v1.0.0 APK [skip ci]'
-            git push origin HEAD:${GITHUB_REF_NAME}
+            git push origin HEAD:claude/beeswins-gas-output
           fi
