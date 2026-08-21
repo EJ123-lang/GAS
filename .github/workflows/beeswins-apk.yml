@@ -48,7 +48,7 @@ jobs:
           {
             rm -rf /tmp/beeswins-src /tmp/BeesWins.zip /tmp/BeesWins.zip.b64
             mkdir -p /tmp/beeswins-src
-            curl -fL --retry 3 'https://raw.githubusercontent.com/EJ123-lang/BlockCraftAI/claude/beeswins-apk-artifact/beeswins/BeesWins-Android-Source-v1.0.0.zip.b64' -o /tmp/BeesWins.zip.b64
+            curl -fL --retry 3 'https://raw.githubusercontent.com/EJ123-lang/BlockCraftAI/ceea121d7bd3e319ad3fe190e700bd1e267782ea/beeswins/BeesWins-Android-Source-v1.0.0.zip.b64' -o /tmp/BeesWins.zip.b64
             base64 -d /tmp/BeesWins.zip.b64 > /tmp/BeesWins.zip
             unzip -q /tmp/BeesWins.zip -d /tmp/beeswins-src
             test -f /tmp/beeswins-src/BeesWins/settings.gradle
