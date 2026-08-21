@@ -1,0 +1,6 @@
+BeesWins v1.1.3
+- Kommissie is nou 'n persentasieveld.
+- Voorbeeld: 6 beteken 6%.
+- Die rand-kommissie word outomaties uit die verkoopprys bereken.
+- Netto wins trek die berekende kommissie af.
+- Bestaande rekords word deur 'n databasis-migrasie behou.
