@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     if: github.event_name != 'issues' || contains(github.event.issue.title, '[BUILD BEESWINS]')
-    name: Build BeesWins v1.1.0
+    name: Build BeesWins v1.1.1
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -20,17 +20,18 @@ jobs:
       issues: write
 
     steps:
-      - name: Checkout BeesWins v1.1 source
+      - name: Checkout BeesWins v1.1.1 source
         id: source
         uses: actions/checkout@v4
         with:
-          ref: claude/beeswins-v1.1-source
+          ref: claude/beeswins-v1.1.1-date-picker
 
       - name: Verify source
         shell: bash
         run: |
           test -f beeswins-v1.1/BeesWins/settings.gradle
           test -f beeswins-v1.1/BeesWins/app/src/main/java/za/co/beeswins/MainActivity.java
+          test -f beeswins-v1.1/BeesWins/app/src/main/java/za/co/beeswins/BeesWinsApp.java
           test -f beeswins-v1.1/BeesWins/app/src/main/res/drawable/beeswins_logo.xml
 
       - name: Set up Java 17
@@ -73,18 +74,18 @@ jobs:
         id: prepare
         run: |
           mkdir -p dist
-          cp beeswins-v1.1/BeesWins/app/build/outputs/apk/debug/app-debug.apk dist/BeesWins-v1.1.0.apk
-          sha256sum dist/BeesWins-v1.1.0.apk > dist/BeesWins-v1.1.0.apk.sha256
+          cp beeswins-v1.1/BeesWins/app/build/outputs/apk/debug/app-debug.apk dist/BeesWins-v1.1.1.apk
+          sha256sum dist/BeesWins-v1.1.1.apk > dist/BeesWins-v1.1.1.apk.sha256
           ls -lh dist/
 
       - name: Upload GitHub Artifact
         id: artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BeesWins-v1.1.0-APK
+          name: BeesWins-v1.1.1-APK
           path: |
-            dist/BeesWins-v1.1.0.apk
-            dist/BeesWins-v1.1.0.apk.sha256
+            dist/BeesWins-v1.1.1.apk
+            dist/BeesWins-v1.1.1.apk.sha256
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -93,20 +94,20 @@ jobs:
         id: publish
         shell: bash
         run: |
-          cp dist/BeesWins-v1.1.0.apk /tmp/BeesWins-v1.1.0.apk
-          cp dist/BeesWins-v1.1.0.apk.sha256 /tmp/BeesWins-v1.1.0.apk.sha256
+          cp dist/BeesWins-v1.1.1.apk /tmp/BeesWins-v1.1.1.apk
+          cp dist/BeesWins-v1.1.1.apk.sha256 /tmp/BeesWins-v1.1.1.apk.sha256
           git fetch origin claude/beeswins-gas-output
           git switch claude/beeswins-gas-output
           mkdir -p beeswins-output
-          cp /tmp/BeesWins-v1.1.0.apk beeswins-output/BeesWins-v1.1.0.apk
-          cp /tmp/BeesWins-v1.1.0.apk.sha256 beeswins-output/BeesWins-v1.1.0.apk.sha256
+          cp /tmp/BeesWins-v1.1.1.apk beeswins-output/BeesWins-v1.1.1.apk
+          cp /tmp/BeesWins-v1.1.1.apk.sha256 beeswins-output/BeesWins-v1.1.1.apk.sha256
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add beeswins-output/BeesWins-v1.1.0.apk beeswins-output/BeesWins-v1.1.0.apk.sha256
+          git add beeswins-output/BeesWins-v1.1.1.apk beeswins-output/BeesWins-v1.1.1.apk.sha256
           if git diff --cached --quiet; then
             echo 'APK output already current.'
           else
-            git commit -m 'Publish BeesWins v1.1.0 APK [skip ci]'
+            git commit -m 'Publish BeesWins v1.1.1 APK [skip ci]'
             git push origin HEAD:claude/beeswins-gas-output
           fi
 
@@ -124,7 +125,7 @@ jobs:
           PUBLISH_OUTCOME: ${{ steps.publish.outcome }}
         run: |
           {
-            echo '### BeesWins v1.1.0 build result'
+            echo '### BeesWins v1.1.1 build result'
             echo
             echo "- Source: ${SOURCE_OUTCOME:-not-run}"
             echo "- Android SDK: ${SDK_OUTCOME:-not-run}"
