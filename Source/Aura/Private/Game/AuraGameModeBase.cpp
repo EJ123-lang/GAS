@@ -211,10 +211,19 @@ FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetNam
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return Super::ChoosePlayerStart_Implementation(Player);
+	}
+
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	const FName DesiredPlayerStartTag = AuraGameInstance
+		? AuraGameInstance->PlayerStartTag
+		: DefaultPlayerStartTag;
 
 	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Actors);
+	UGameplayStatics::GetAllActorsOfClass(World, APlayerStart::StaticClass(), Actors);
 	if (Actors.Num() > 0)
 	{
 		AActor* SelectedActor = Actors[0];
@@ -222,7 +231,7 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 		{
 			if (APlayerStart* PlayerStart = Cast<APlayerStart>(Actor))
 			{
-				if (PlayerStart->PlayerStartTag == AuraGameInstance->PlayerStartTag)
+				if (!DesiredPlayerStartTag.IsNone() && PlayerStart->PlayerStartTag == DesiredPlayerStartTag)
 				{
 					SelectedActor = PlayerStart;
 					break;
@@ -231,7 +240,7 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 		}
 		return SelectedActor;
 	}
-	return nullptr;
+	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
 void AAuraGameModeBase::PlayerDied(ACharacter* DeadCharacter)
