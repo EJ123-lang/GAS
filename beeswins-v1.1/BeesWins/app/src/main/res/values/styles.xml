@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BeesWins</string>
+    <color name="deep_green">#005A3C</color>
+    <color name="deep_green_2">#074E38</color>
+    <color name="gold">#F2BE4A</color>
+    <style name="Theme.BeesWins" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#005A3C</item>
+        <item name="android:navigationBarColor">#074E38</item>
+        <item name="android:colorAccent">#005A3C</item>
+    </style>
+</resources>
