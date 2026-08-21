@@ -1,6 +1,10 @@
 name: Build BeesWins APK
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'beeswins-v1.1/**'
   issues:
     types: [opened]
   workflow_dispatch:
