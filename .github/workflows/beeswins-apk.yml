@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     if: github.event_name != 'issues' || contains(github.event.issue.title, '[BUILD BEESWINS]')
-    name: Build BeesWins v1.1.2
+    name: Build BeesWins v1.1.3
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -20,11 +20,11 @@ jobs:
       issues: write
 
     steps:
-      - name: Checkout BeesWins v1.1.2 source
+      - name: Checkout BeesWins v1.1.3 source
         id: source
         uses: actions/checkout@v4
         with:
-          ref: claude/beeswins-v1.1.2-date-picker-fix
+          ref: claude/beeswins-v1.1.3-commission-percent
 
       - name: Verify source
         shell: bash
@@ -33,6 +33,12 @@ jobs:
           test -f beeswins-v1.1/BeesWins/app/src/main/java/za/co/beeswins/MainActivity.java
           test -f beeswins-v1.1/BeesWins/app/src/main/java/za/co/beeswins/BeesWinsApp.java
           test -f beeswins-v1.1/BeesWins/app/src/main/res/drawable/beeswins_logo.xml
+          test -f beeswins-v1.1/tools/apply_v113_commission_patch.py
+
+      - name: Apply commission percentage update
+        id: commission_patch
+        shell: bash
+        run: python3 beeswins-v1.1/tools/apply_v113_commission_patch.py
 
       - name: Set up Java 17
         id: java
@@ -74,18 +80,18 @@ jobs:
         id: prepare
         run: |
           mkdir -p dist
-          cp beeswins-v1.1/BeesWins/app/build/outputs/apk/debug/app-debug.apk dist/BeesWins-v1.1.2.apk
-          sha256sum dist/BeesWins-v1.1.2.apk > dist/BeesWins-v1.1.2.apk.sha256
+          cp beeswins-v1.1/BeesWins/app/build/outputs/apk/debug/app-debug.apk dist/BeesWins-v1.1.3.apk
+          sha256sum dist/BeesWins-v1.1.3.apk > dist/BeesWins-v1.1.3.apk.sha256
           ls -lh dist/
 
       - name: Upload GitHub Artifact
         id: artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BeesWins-v1.1.2-APK
+          name: BeesWins-v1.1.3-APK
           path: |
-            dist/BeesWins-v1.1.2.apk
-            dist/BeesWins-v1.1.2.apk.sha256
+            dist/BeesWins-v1.1.3.apk
+            dist/BeesWins-v1.1.3.apk.sha256
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -94,20 +100,20 @@ jobs:
         id: publish
         shell: bash
         run: |
-          cp dist/BeesWins-v1.1.2.apk /tmp/BeesWins-v1.1.2.apk
-          cp dist/BeesWins-v1.1.2.apk.sha256 /tmp/BeesWins-v1.1.2.apk.sha256
+          cp dist/BeesWins-v1.1.3.apk /tmp/BeesWins-v1.1.3.apk
+          cp dist/BeesWins-v1.1.3.apk.sha256 /tmp/BeesWins-v1.1.3.apk.sha256
           git fetch origin claude/beeswins-gas-output
           git switch claude/beeswins-gas-output
           mkdir -p beeswins-output
-          cp /tmp/BeesWins-v1.1.2.apk beeswins-output/BeesWins-v1.1.2.apk
-          cp /tmp/BeesWins-v1.1.2.apk.sha256 beeswins-output/BeesWins-v1.1.2.apk.sha256
+          cp /tmp/BeesWins-v1.1.3.apk beeswins-output/BeesWins-v1.1.3.apk
+          cp /tmp/BeesWins-v1.1.3.apk.sha256 beeswins-output/BeesWins-v1.1.3.apk.sha256
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add beeswins-output/BeesWins-v1.1.2.apk beeswins-output/BeesWins-v1.1.2.apk.sha256
+          git add beeswins-output/BeesWins-v1.1.3.apk beeswins-output/BeesWins-v1.1.3.apk.sha256
           if git diff --cached --quiet; then
             echo 'APK output already current.'
           else
-            git commit -m 'Publish BeesWins v1.1.2 APK [skip ci]'
+            git commit -m 'Publish BeesWins v1.1.3 APK [skip ci]'
             git push origin HEAD:claude/beeswins-gas-output
           fi
 
@@ -118,6 +124,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          PATCH_OUTCOME: ${{ steps.commission_patch.outcome }}
           SDK_OUTCOME: ${{ steps.sdk.outcome }}
           COMPILE_OUTCOME: ${{ steps.compile.outcome }}
           PREPARE_OUTCOME: ${{ steps.prepare.outcome }}
@@ -125,9 +132,10 @@ jobs:
           PUBLISH_OUTCOME: ${{ steps.publish.outcome }}
         run: |
           {
-            echo '### BeesWins v1.1.2 build result'
+            echo '### BeesWins v1.1.3 build result'
             echo
             echo "- Source: ${SOURCE_OUTCOME:-not-run}"
+            echo "- Commission patch: ${PATCH_OUTCOME:-not-run}"
             echo "- Android SDK: ${SDK_OUTCOME:-not-run}"
             echo "- Compile: ${COMPILE_OUTCOME:-not-run}"
             echo "- Prepare APK: ${PREPARE_OUTCOME:-not-run}"
